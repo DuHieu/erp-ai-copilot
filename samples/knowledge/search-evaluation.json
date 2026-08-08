@@ -1,0 +1,43 @@
+[
+  {
+    "id": "eval-01",
+    "query": "Khi invoice quá hạn 14 ngày thì xử lý thế nào?",
+    "language": "Vietnamese",
+    "expectedDocument": "finance-procedure.txt",
+    "expectedSection": "Accounts Receivable Escalation",
+    "expectedMinScore": 0.50
+  },
+  {
+    "id": "eval-02",
+    "query": "Khoản thanh toán hơn 100 triệu ai phê duyệt?",
+    "language": "Vietnamese",
+    "expectedDocument": "payment-policy.md",
+    "expectedSection": "Payment Approval Matrix",
+    "expectedMinScore": 0.50
+  },
+  {
+    "id": "eval-03",
+    "query": "How to handle delayed receivables escalation?",
+    "language": "English",
+    "expectedDocument": "finance-procedure.txt",
+    "expectedSection": "Accounts Receivable Escalation",
+    "expectedMinScore": 0.55
+  },
+  {
+    "id": "eval-04",
+    "query": "Quy trình xử lý hóa đơn quá hạn 2 tuần?",
+    "language": "Vietnamese",
+    "expectedDocument": "finance-procedure.txt",
+    "expectedSection": "Accounts Receivable Escalation",
+    "expectedMinScore": 0.50
+  },
+  {
+    "id": "eval-05",
+    "query": "How to repair a motorcycle engine?",
+    "language": "English",
+    "expectedDocument": null,
+    "expectedSection": null,
+    "expectedMinScore": 0.35,
+    "shouldReturnZeroResults": true
+  }
+]

@@ -1,0 +1,168 @@
+version: '3.8'
+
+services:
+  api:
+    image: ghcr.io/${REPO_OWNER:-duhieu}/erp-ai-api:${ERP_AI_VERSION:-latest}
+    container_name: erp-ai-api
+    ports:
+      - "${API_PORT:-5000}:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - AI__Provider=Ollama
+      - AI__Endpoint=http://ollama:11434
+      - AI__Model=${OLLAMA_MODEL:-qwen3}
+      - DocumentParser__Endpoint=http://document-parser:8000
+      - Embedding__Endpoint=http://embedding-service:8010
+      - VectorStore__Endpoint=http://qdrant:6333
+      - VectorStore__Collection=erp_knowledge_chunks
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/erp-demo.db
+      - Knowledge__StoragePath=/app/data/knowledge/documents
+      - Rag__TopK=${RAG_TOP_K:-6}
+      - Rag__MinimumScore=${RAG_MIN_SCORE:-0.35}
+      - Rag__MaximumSources=${RAG_MAX_SOURCES:-5}
+      - Rag__MaxContextCharacters=${RAG_MAX_CONTEXT_CHARACTERS:-14000}
+      - Rag__MaxChunkCharacters=${RAG_MAX_CHUNK_CHARACTERS:-3500}
+      - Rag__MaxCitationSnippetCharacters=${RAG_MAX_CITATION_SNIPPET_CHARACTERS:-300}
+      - Rag__IncludeAdjacentChunks=${RAG_INCLUDE_ADJACENT_CHUNKS:-true}
+      - Rag__MaxAdjacentChunks=${RAG_MAX_ADJACENT_CHUNKS:-1}
+      - Rag__MaxConversationTurns=${RAG_MAX_CONVERSATION_TURNS:-6}
+      - Rag__Temperature=${RAG_TEMPERATURE:-0.1}
+      - Rag__MaxOutputTokens=${RAG_MAX_OUTPUT_TOKENS:-800}
+    volumes:
+      - erp_data:/app/data
+      - knowledge_data:/app/data/knowledge
+    depends_on:
+      ollama:
+        condition: service_healthy
+      ollama-init:
+        condition: service_completed_successfully
+      document-parser:
+        condition: service_healthy
+      embedding-service:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - erp-ai-network
+
+  web:
+    image: ghcr.io/${REPO_OWNER:-duhieu}/erp-ai-web:${ERP_AI_VERSION:-latest}
+    container_name: erp-ai-web
+    ports:
+      - "${WEB_PORT:-5001}:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - Api__BaseUrl=http://api:8080
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - erp-ai-network
+
+  document-parser:
+    image: ghcr.io/${REPO_OWNER:-duhieu}/erp-ai-document-parser:${ERP_AI_VERSION:-latest}
+    container_name: erp-ai-document-parser
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - erp-ai-network
+
+  embedding-service:
+    image: ghcr.io/${REPO_OWNER:-duhieu}/erp-ai-embedding-service:${ERP_AI_VERSION:-latest}
+    container_name: erp-ai-embedding-service
+    environment:
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-BAAI/bge-m3}
+    volumes:
+      - embedding_model_data:/root/.cache/huggingface
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8010/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - erp-ai-network
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: erp-ai-qdrant
+    ports:
+      - "127.0.0.1:6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:6333/healthz || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - erp-ai-network
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: erp-ai-ollama
+    ports:
+      - "127.0.0.1:11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - erp-ai-network
+
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: erp-ai-ollama-init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen3}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "Checking model '${OLLAMA_MODEL:-qwen3}' status in Ollama..."
+        if ollama list | grep -q "${OLLAMA_MODEL:-qwen3}"; then
+          echo "Model '${OLLAMA_MODEL:-qwen3}' is already downloaded and ready."
+        else
+          echo "Downloading model '${OLLAMA_MODEL:-qwen3}' from Ollama registry..."
+          ollama pull "${OLLAMA_MODEL:-qwen3}"
+          echo "Model '${OLLAMA_MODEL:-qwen3}' downloaded successfully."
+        fi
+    restart: "no"
+    networks:
+      - erp-ai-network
+
+networks:
+  erp-ai-network:
+    name: erp-ai-network
+    driver: bridge
+
+volumes:
+  erp_data:
+    name: erp-ai-data
+  knowledge_data:
+    name: erp-ai-knowledge-data
+  embedding_model_data:
+    name: erp-ai-embedding-model-data
+  qdrant_data:
+    name: erp-ai-qdrant-data
+  ollama_data:
+    name: erp-ai-ollama-data

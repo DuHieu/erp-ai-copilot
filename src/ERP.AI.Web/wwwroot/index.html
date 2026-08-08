@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP AI Copilot — Enterprise Assistant & Knowledge Base</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <div class="brand-icon">⚡</div>
+                    <div class="brand-text">
+                        <span class="brand-title">ERP AI Copilot</span>
+                        <span class="brand-subtitle">Phase 2.2 • Multilingual Semantic Search</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="sidebar-section">
+                <div class="section-label">Navigation</div>
+                <div class="nav-tabs">
+                    <button class="nav-tab-btn active" id="tabCopilotBtn" onclick="switchTab('copilot')">
+                        <span class="icon">💬</span>
+                        <span class="text">AI Copilot</span>
+                    </button>
+                    <button class="nav-tab-btn" id="tabKnowledgeBtn" onclick="switchTab('knowledge')">
+                        <span class="icon">📚</span>
+                        <span class="text">Knowledge Base</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Copilot Prompts (Visible on Copilot Tab) -->
+            <div class="sidebar-section" id="copilotPromptsSection">
+                <div class="section-label">Quick Prompts</div>
+                <div class="quick-prompts">
+                    <button class="prompt-btn" onclick="sendQuickPrompt('Top 5 khách hàng đang nợ nhiều nhất?')">
+                        <span class="icon">📊</span>
+                        <span class="text">Top 5 khách hàng còn nợ...</span>
+                    </button>
+                    <button class="prompt-btn" onclick="sendQuickPrompt('Khách hàng MAEDA còn nợ bao nhiêu?')">
+                        <span class="icon">🏢</span>
+                        <span class="text">Chi tiết công nợ MAEDA</span>
+                    </button>
+                    <button class="prompt-btn" onclick="sendQuickPrompt('Doanh thu tháng 7/2026 là bao nhiêu?')">
+                        <span class="icon">📈</span>
+                        <span class="text">Doanh thu tháng 7/2026</span>
+                    </button>
+                    <button class="prompt-btn" onclick="sendQuickPrompt('Có mặt hàng nào sắp hết hàng không?')">
+                        <span class="icon">📦</span>
+                        <span class="text">Cảnh báo tồn kho tối thiểu</span>
+                    </button>
+                    <button class="prompt-btn" onclick="sendQuickPrompt('Project nào đang vượt ngân sách?')">
+                        <span class="icon">⚠️</span>
+                        <span class="text">Dự án vượt budget</span>
+                    </button>
+                    <button class="prompt-btn prompt-btn-danger" onclick="sendQuickPrompt('Tạo invoice mới cho MAEDA')">
+                        <span class="icon">🔒</span>
+                        <span class="text">Test Write Rejection</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Knowledge Info (Visible on Knowledge Tab) -->
+            <div class="sidebar-section hidden" id="knowledgeInfoSection">
+                <div class="section-label">Vector Engine Info</div>
+                <div class="format-pills">
+                    <span class="format-pill">🎯 BAAI/bge-m3</span>
+                    <span class="format-pill">🔍 Qdrant DB</span>
+                    <span class="format-pill">🇻🇳 Multilingual</span>
+                    <span class="format-pill">📐 Cosine Similarity</span>
+                </div>
+                <div class="info-card" style="margin-top: 12px;">
+                    <div class="info-row">
+                        <span class="label">Embedding Model:</span>
+                        <span class="value">BAAI/bge-m3</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Vector Store:</span>
+                        <span class="value">Qdrant Vector DB</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Collection:</span>
+                        <span class="value">erp_knowledge_chunks</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Min Score Threshold:</span>
+                        <span class="value">0.35</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section system-info">
+                <div class="section-label">System Architecture</div>
+                <div class="info-card">
+                    <div class="info-row">
+                        <span class="label">Backend:</span>
+                        <span class="value">ASP.NET Core Web API 8.0</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">LLM Runtime:</span>
+                        <span class="value">Ollama (qwen3) / Local</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Embedding Service:</span>
+                        <span class="value">FastAPI / Python (8010)</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Vector DB:</span>
+                        <span class="value">Qdrant Service (6333)</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- View 1: Chat Panel (Copilot) -->
+            <main class="chat-panel" id="copilotView">
+                <header class="chat-header">
+                    <div class="header-status">
+                        <span class="status-indicator"></span>
+                        <span class="status-text">ERP Copilot Online</span>
+                        <span class="badge badge-local">Local AI</span>
+                    </div>
+                    <div class="header-actions">
+                        <button class="clear-btn" onclick="clearChat()">Clear History</button>
+                    </div>
+                </header>
+
+                <div class="messages-container" id="messagesContainer">
+                    <div class="welcome-banner">
+                        <div class="welcome-icon">🤖</div>
+                        <h2>Welcome to ERP AI Copilot</h2>
+                        <p>Ask anything about receivables, revenue, inventory alerts, or project budgets in natural Vietnamese or English. All queries are backed by safe C# ERP tools.</p>
+                    </div>
+                </div>
+
+                <div class="chat-input-area">
+                    <form id="chatForm" onsubmit="handleChatSubmit(event)">
+                        <div class="input-wrapper">
+                            <input type="text" id="userInput" placeholder="Ask a question about ERP data (e.g. Top 5 khách hàng nợ nhiều nhất)..." autocomplete="off">
+                            <button type="submit" id="sendBtn" class="send-button">
+                                <span>Send</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </main>
+
+            <!-- View 2: Knowledge Center Panel -->
+            <main class="knowledge-panel hidden" id="knowledgeView">
+                <header class="chat-header">
+                    <div class="header-status">
+                        <span class="status-indicator status-knowledge"></span>
+                        <span class="status-text">Knowledge Engine & Semantic Search</span>
+                        <span class="badge badge-phase">Phase 2.2 Ready</span>
+                    </div>
+                    <div class="header-actions">
+                        <button class="secondary-btn" style="margin-right: 8px;" onclick="triggerBatchIndexUnindexed()">⚡ Index Unindexed</button>
+                        <button class="primary-btn" onclick="openUploadModal()">
+                            <span>+ Upload Document</span>
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Sub Navigation Tabs for Knowledge Center -->
+                <div class="knowledge-subtabs">
+                    <button class="subtab-btn active" id="subtabDocsBtn" onclick="switchKnowledgeSubtab('docs')">📑 Documents List</button>
+                    <button class="subtab-btn" id="subtabSearchBtn" onclick="switchKnowledgeSubtab('search')">🔍 Semantic Search</button>
+                    <button class="subtab-btn" id="subtabAskBtn" onclick="switchKnowledgeSubtab('ask')">💬 Ask Knowledge</button>
+                </div>
+
+                <!-- Subtab Pane 1: Documents List -->
+                <div class="knowledge-content" id="knowledgeDocsPane">
+                    <div class="knowledge-controls">
+                        <div class="search-box">
+                            <input type="text" id="knowledgeSearchInput" placeholder="Search by title, filename, category, source..." oninput="handleKnowledgeSearch()">
+                        </div>
+                        <div class="filter-box">
+                            <select id="knowledgeCategoryFilter" onchange="loadKnowledgeDocuments()">
+                                <option value="">All Categories</option>
+                                <option value="Finance">Finance</option>
+                                <option value="Accounting">Accounting</option>
+                                <option value="HR">HR</option>
+                                <option value="Quality">Quality</option>
+                                <option value="ERP Manual">ERP Manual</option>
+                                <option value="Procurement">Procurement</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="knowledge-table-wrapper">
+                        <table class="knowledge-table">
+                            <thead>
+                                <tr>
+                                    <th>Document Title</th>
+                                    <th>Format</th>
+                                    <th>Size</th>
+                                    <th>Status</th>
+                                    <th>Vector Index</th>
+                                    <th>Pages</th>
+                                    <th>Chunks</th>
+                                    <th>Category</th>
+                                    <th>Uploaded</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="knowledgeTableBody">
+                                <tr>
+                                    <td colspan="10" class="loading-cell">Loading Knowledge Documents...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Subtab Pane 2: Semantic Search View -->
+                <div class="knowledge-content hidden" id="knowledgeSearchPane">
+                    <div class="semantic-search-container">
+                        <div class="search-hero">
+                            <h2>Vector Similarity Search</h2>
+                            <p>Query enterprise documents using natural Vietnamese or English. Uses BAAI/bge-m3 dense vector embeddings and Qdrant similarity scoring.</p>
+                            
+                            <form id="semanticSearchForm" onsubmit="handleSemanticSearchSubmit(event)" style="margin-top: 16px;">
+                                <div class="input-wrapper search-wrapper">
+                                    <input type="text" id="semanticQueryInput" placeholder="e.g. Khi invoice quá hạn 14 ngày thì xử lý thế nào? / Payment approval limit?" autocomplete="off" required>
+                                    <button type="submit" id="semanticSearchBtn" class="send-button">
+                                        <span>Search</span>
+                                    </button>
+                                </div>
+                                <div class="search-options">
+                                    <label>Category Filter:
+                                        <select id="semanticCategorySelect">
+                                            <option value="">All Categories</option>
+                                            <option value="Finance">Finance</option>
+                                            <option value="Accounting">Accounting</option>
+                                            <option value="HR">HR</option>
+                                            <option value="ERP Manual">ERP Manual</option>
+                                        </select>
+                                    </label>
+                                    <label>Top K Results:
+                                        <select id="semanticTopKSelect">
+                                            <option value="3">Top 3</option>
+                                            <option value="5" selected>Top 5</option>
+                                            <option value="10">Top 10</option>
+                                        </select>
+                                    </label>
+                                    <label>Min Score Threshold:
+                                        <select id="semanticMinScoreSelect">
+                                            <option value="0.25">0.25 (Lenient)</option>
+                                            <option value="0.35" selected>0.35 (Standard)</option>
+                                            <option value="0.50">0.50 (Strict)</option>
+                                        </select>
+                                    </label>
+                                </div>
+                            </form>
+
+                            <div class="sample-search-pills">
+                                <span class="pill-label">Try sample queries:</span>
+                                <button class="sample-pill" onclick="setSemanticQuery('Khi invoice quá hạn 14 ngày thì xử lý thế nào?')">Hóa đơn quá hạn 14 ngày?</button>
+                                <button class="sample-pill" onclick="setSemanticQuery('Khoản thanh toán hơn 100 triệu ai phê duyệt?')">Phê duyệt thanh toán > 100M?</button>
+                                <button class="sample-pill" onclick="setSemanticQuery('How to handle delayed receivables escalation?')">Delayed receivables SOP?</button>
+                            </div>
+                        </div>
+
+                        <!-- Search Results Listing -->
+                        <div class="search-results-wrapper" id="searchResultsWrapper">
+                            <div class="empty-search-state">
+                                <div class="empty-icon">🔍</div>
+                                <p>Enter a search query above to inspect matching knowledge chunks and vector similarity scores.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subtab Pane 3: Ask Knowledge (Grounded RAG Chat) -->
+                <div class="knowledge-content hidden" id="knowledgeAskPane">
+                    <div class="rag-chat-container">
+
+                        <div class="rag-chat-header">
+                            <div>
+                                <h2>Ask Knowledge Base</h2>
+                                <p class="rag-chat-subtitle">Ask questions about company documents. Answers are grounded in retrieved evidence only — no hallucination.</p>
+                            </div>
+                            <button class="secondary-btn" onclick="resetRagConversation()" title="Start new conversation">🔄 New Chat</button>
+                        </div>
+
+                        <!-- Sample question pills -->
+                        <div class="rag-sample-pills">
+                            <span class="rag-pills-label">Try:</span>
+                            <button class="rag-pill" onclick="setRagSampleQuestion('Khi invoice quá hạn 14 ngày thì xử lý thế nào?')">Invoice 14 ngày quá hạn?</button>
+                            <button class="rag-pill" onclick="setRagSampleQuestion('Khoản thanh toán hơn 100 triệu ai phê duyệt?')">Phê duyệt > 100 triệu?</button>
+                            <button class="rag-pill" onclick="setRagSampleQuestion('What is the approval process for credit limit extension?')">Credit limit approval</button>
+                            <button class="rag-pill" onclick="setRagSampleQuestion('Payment cut-off dates?')">Payment cut-off?</button>
+                        </div>
+
+                        <!-- Answer History -->
+                        <div class="rag-answer-history" id="ragAnswerHistory"></div>
+
+                        <!-- Loading Spinner -->
+                        <div class="rag-loading hidden" id="ragLoadingSpinner">
+                            <div class="rag-loading-dots"><span></span><span></span><span></span></div>
+                            <span>Searching knowledge base and generating grounded answer...</span>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div class="rag-error-msg hidden" id="ragErrorMsg"></div>
+
+                        <!-- Question Input -->
+                        <div class="rag-input-area">
+                            <textarea
+                                id="ragQuestionInput"
+                                class="rag-question-textarea"
+                                placeholder="Ask a question about your company documents..."
+                                rows="2"
+                                onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); submitRagQuestion();}"
+                            ></textarea>
+                            <button id="ragAskBtn" class="primary-btn rag-ask-btn" onclick="submitRagQuestion()">Ask</button>
+                        </div>
+                        <div class="rag-input-hint">Press <kbd>Enter</kbd> to ask · <kbd>Shift+Enter</kbd> for new line · Answers grounded in Knowledge Base only</div>
+
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Upload Document Modal -->
+    <div class="modal-overlay hidden" id="uploadModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Upload Knowledge Document</h3>
+                <button class="modal-close-btn" onclick="closeUploadModal()">&times;</button>
+            </div>
+            <form id="uploadForm" onsubmit="handleDocumentUpload(event)">
+                <div class="form-group">
+                    <label>Select Document File (*.pdf, *.docx, *.txt, *.md — Max 25 MB):</label>
+                    <input type="file" id="uploadFileInput" accept=".pdf,.docx,.txt,.md,.markdown" required>
+                </div>
+                <div class="form-group">
+                    <label>Title:</label>
+                    <input type="text" id="uploadTitleInput" placeholder="e.g. Accounts Receivable Collection Procedure">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Category:</label>
+                        <select id="uploadCategoryInput">
+                            <option value="Finance">Finance</option>
+                            <option value="Accounting">Accounting</option>
+                            <option value="HR">HR</option>
+                            <option value="Quality">Quality</option>
+                            <option value="ERP Manual">ERP Manual</option>
+                            <option value="Procurement">Procurement</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Version:</label>
+                        <input type="text" id="uploadVersionInput" placeholder="e.g. v1.0 / 2026.08">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Source / Department:</label>
+                    <input type="text" id="uploadSourceInput" placeholder="e.g. Finance Department SOP">
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <textarea id="uploadDescriptionInput" rows="2" placeholder="Brief description of the document contents..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="cancel-btn" onclick="closeUploadModal()">Cancel</button>
+                    <button type="submit" id="uploadSubmitBtn" class="primary-btn">Start Ingestion</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Document Detail & Chunks Modal -->
+    <div class="modal-overlay hidden" id="detailModal">
+        <div class="modal-card modal-card-large">
+            <div class="modal-header">
+                <h3 id="detailModalTitle">Document Details</h3>
+                <button class="modal-close-btn" onclick="closeDetailModal()">&times;</button>
+            </div>
+            <div class="detail-tabs">
+                <button class="detail-tab-btn active" id="detailOverviewTabBtn" onclick="switchDetailTab('overview')">Overview</button>
+                <button class="detail-tab-btn" id="detailTextTabBtn" onclick="switchDetailTab('text')">Extracted Text</button>
+                <button class="detail-tab-btn" id="detailChunksTabBtn" onclick="switchDetailTab('chunks')">Chunks & Structure</button>
+            </div>
+            <div class="detail-content-area">
+                <!-- Overview Tab -->
+                <div class="detail-pane" id="detailOverviewPane">
+                    <div class="detail-grid" id="detailGrid">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+                <!-- Extracted Text Tab -->
+                <div class="detail-pane hidden" id="detailTextPane">
+                    <pre class="text-viewer" id="detailTextViewer">Loading extracted text...</pre>
+                </div>
+                <!-- Chunks Tab -->
+                <div class="detail-pane hidden" id="detailChunksPane">
+                    <div class="chunks-list" id="detailChunksList">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="secondary-btn" id="reindexBtn" onclick="triggerReindexDoc()">Re-index Vectors</button>
+                <button type="button" class="secondary-btn" id="reprocessBtn" onclick="triggerReprocess()">Reprocess</button>
+                <button type="button" class="danger-btn" id="deleteDocBtn" onclick="triggerDeleteDoc()">Delete Document</button>
+                <button type="button" class="cancel-btn" onclick="closeDetailModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/knowledge.js"></script>
+</body>
+</html>

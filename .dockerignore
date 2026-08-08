@@ -1,0 +1,15 @@
+**/bin/
+**/obj/
+.git/
+.gitignore
+.vs/
+.idea/
+.vscode/
+TestResults/
+coverage/
+.env
+*.user
+*.suo
+samples/database/*.db
+README.md
+LICENSE

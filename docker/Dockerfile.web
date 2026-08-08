@@ -1,0 +1,29 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+COPY ERP.AI.sln .
+COPY src/ERP.AI.Core/ERP.AI.Core.csproj src/ERP.AI.Core/
+COPY src/ERP.AI.Infrastructure/ERP.AI.Infrastructure.csproj src/ERP.AI.Infrastructure/
+COPY src/ERP.AI.Tools/ERP.AI.Tools.csproj src/ERP.AI.Tools/
+COPY src/ERP.AI.Copilot/ERP.AI.Copilot.csproj src/ERP.AI.Copilot/
+COPY src/ERP.AI.Api/ERP.AI.Api.csproj src/ERP.AI.Api/
+COPY src/ERP.AI.Web/ERP.AI.Web.csproj src/ERP.AI.Web/
+COPY tests/ERP.AI.Core.Tests/ERP.AI.Core.Tests.csproj tests/ERP.AI.Core.Tests/
+COPY tests/ERP.AI.Tools.Tests/ERP.AI.Tools.Tests.csproj tests/ERP.AI.Tools.Tests/
+COPY tests/ERP.AI.Copilot.Tests/ERP.AI.Copilot.Tests.csproj tests/ERP.AI.Copilot.Tests/
+COPY tests/ERP.AI.Knowledge.Tests/ERP.AI.Knowledge.Tests.csproj tests/ERP.AI.Knowledge.Tests/
+
+RUN dotnet restore ERP.AI.sln
+
+COPY . .
+
+RUN dotnet publish src/ERP.AI.Web/ERP.AI.Web.csproj -c Release -o /app/publish --no-restore
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+COPY --from=build /app/publish .
+
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
+
+ENTRYPOINT ["dotnet", "ERP.AI.Web.dll"]

@@ -1,0 +1,25 @@
+PAYMENT APPROVAL POLICY
+Document Code: FIN-POL-001
+Version: 1.0
+Effective Date: January 1, 2026
+
+SECTION 1: PAYMENT APPROVAL AUTHORITY
+
+All corporate payments and disbursements must be approved according to the
+following authority matrix:
+
+1.1 Payments up to 50,000,000 VND:
+    Approved by: Department Manager
+
+1.2 Payments from 50,000,001 VND to 100,000,000 VND:
+    Approved by: Financial Controller
+
+1.3 Payments above 100,000,000 VND:
+    Approved by: General Director (Chief Executive Officer)
+
+NOTE: This is Policy Version 1.0. Please verify against the latest issued version.
+
+SECTION 2: EMERGENCY PAYMENTS
+
+Emergency disbursements outside the regular payment cycle require
+Chief Financial Officer (CFO) authorization regardless of amount.

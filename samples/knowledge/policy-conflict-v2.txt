@@ -1,0 +1,27 @@
+PAYMENT APPROVAL POLICY — REVISED
+Document Code: FIN-POL-001-REV
+Version: 2.0
+Effective Date: July 1, 2026
+
+SECTION 1: REVISED PAYMENT APPROVAL AUTHORITY
+
+Following the annual policy review, payment approval thresholds have been
+updated as follows:
+
+1.1 Payments up to 50,000,000 VND:
+    Approved by: Department Manager
+
+1.2 Payments from 50,000,001 VND to 200,000,000 VND:
+    Approved by: Financial Controller
+
+1.3 Payments above 200,000,000 VND:
+    Approved by: General Director (Chief Executive Officer)
+
+NOTE: This revised policy (Version 2.0) supersedes Version 1.0 dated January 1, 2026.
+If the ERP system still reflects the old threshold of 100,000,000 VND,
+please contact Finance Operations to update the approval workflow.
+
+SECTION 2: EMERGENCY PAYMENTS
+
+Emergency disbursements outside the regular payment cycle require
+Chief Financial Officer (CFO) authorization regardless of amount.

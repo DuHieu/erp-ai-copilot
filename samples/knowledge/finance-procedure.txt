@@ -1,0 +1,18 @@
+ACCOUNTS RECEIVABLE COLLECTION PROCEDURE
+Document Code: SOP-FIN-004
+Effective Date: July 1, 2026
+Version: 3.2
+
+1. PURPOSE AND SCOPE
+This document defines the standard operating procedure for monitoring, following up, and collecting outstanding customer receivables across all corporate divisions.
+
+2. OVERDUE AGEING ESCALATION MATRIX
+- 1 to 7 Days Overdue: Automated email payment reminder sent to primary customer contact.
+- 8 to 14 Days Overdue: Phone call by Accounts Receivable specialist. Re-send invoice and statement of account.
+- 15 to 30 Days Overdue: Issue formal Notice of Default signed by Credit Control Manager. Temporarily hold new sales orders.
+- Over 30 Days Overdue: Escalate to Legal and Chief Financial Officer for debt recovery or legal collection action.
+
+3. APPROVAL AUTHORITY FOR CREDIT LIMIT EXTENSION
+- Up to $50,000 USD: Finance Manager Approval.
+- $50,001 to $200,000 USD: Chief Financial Officer Approval.
+- Above $200,000 USD: Board of Directors Approval.

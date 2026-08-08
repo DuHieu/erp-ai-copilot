@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ERP.AI.Core\ERP.AI.Core.csproj" />
+    <ProjectReference Include="..\ERP.AI.Infrastructure\ERP.AI.Infrastructure.csproj" />
+    <ProjectReference Include="..\ERP.AI.Tools\ERP.AI.Tools.csproj" />
+    <ProjectReference Include="..\ERP.AI.Copilot\ERP.AI.Copilot.csproj" />
+    <ProjectReference Include="..\ERP.AI.Knowledge\ERP.AI.Knowledge.csproj" />
+  </ItemGroup>
+
+  <!-- Copy sample prompts and knowledge docs to output for runtime access -->
+  <ItemGroup>
+    <None Update="..\..\samples\prompts\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>samples\prompts\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </None>
+  </ItemGroup>
+
+</Project>
+
