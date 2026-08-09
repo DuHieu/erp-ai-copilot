@@ -31,6 +31,7 @@ Updated in this review:
 - Added Web proxy integration tests to verify JSON content type and forwarded path/query.
 - Switched Web proxy controllers to `IHttpClientFactory` and preserved upstream response content type.
 - Added `scripts/docker-smoke.ps1` for local container health verification.
+- Split heavy sidecar Docker builds into a separate path-filtered/manual GitHub Actions workflow.
 
 ## Known Gaps
 
