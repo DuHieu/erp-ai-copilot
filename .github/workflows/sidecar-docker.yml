@@ -33,6 +33,8 @@ jobs:
         file: services/document-parser/Dockerfile
         push: false
         tags: erp-ai-document-parser:ci-test
+        cache-from: type=gha,scope=erp-ai-document-parser
+        cache-to: type=gha,mode=max,scope=erp-ai-document-parser
 
     - name: Build Docker Image - Embedding Service Sidecar
       uses: docker/build-push-action@v5
@@ -41,3 +43,5 @@ jobs:
         file: services/embedding-service/Dockerfile
         push: false
         tags: erp-ai-embedding-service:ci-test
+        cache-from: type=gha,scope=erp-ai-embedding-service
+        cache-to: type=gha,mode=max,scope=erp-ai-embedding-service

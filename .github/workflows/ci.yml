@@ -50,6 +50,8 @@ jobs:
         file: docker/Dockerfile.api
         push: false
         tags: erp-ai-api:ci-test
+        cache-from: type=gha,scope=erp-ai-api
+        cache-to: type=gha,mode=max,scope=erp-ai-api
 
     - name: Build Docker Image - Web UI
       uses: docker/build-push-action@v5
@@ -58,3 +60,5 @@ jobs:
         file: docker/Dockerfile.web
         push: false
         tags: erp-ai-web:ci-test
+        cache-from: type=gha,scope=erp-ai-web
+        cache-to: type=gha,mode=max,scope=erp-ai-web

@@ -34,6 +34,7 @@ Updated in this review:
 - Split heavy sidecar Docker builds into a separate path-filtered/manual GitHub Actions workflow.
 - Added opt-in API key protection for `/api/*`, config-driven current user/permissions, and Web proxy API-key forwarding.
 - Added Playwright Web smoke runner and path-filtered CI workflow for the Web UI.
+- Added GitHub Actions BuildKit cache scopes for app and sidecar Docker image builds.
 
 ## Known Gaps
 

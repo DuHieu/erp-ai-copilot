@@ -67,6 +67,8 @@ jobs:
         push: true
         tags: ${{ steps.meta_api.outputs.tags }}
         labels: ${{ steps.meta_api.outputs.labels }}
+        cache-from: type=gha,scope=erp-ai-api
+        cache-to: type=gha,mode=max,scope=erp-ai-api
 
     # --- Web Image Tags & Push ---
     - name: Extract Docker Metadata — Web UI
@@ -88,6 +90,8 @@ jobs:
         push: true
         tags: ${{ steps.meta_web.outputs.tags }}
         labels: ${{ steps.meta_web.outputs.labels }}
+        cache-from: type=gha,scope=erp-ai-web
+        cache-to: type=gha,mode=max,scope=erp-ai-web
 
     # --- Document Parser Image Tags & Push ---
     - name: Extract Docker Metadata — Document Parser
@@ -109,6 +113,8 @@ jobs:
         push: true
         tags: ${{ steps.meta_parser.outputs.tags }}
         labels: ${{ steps.meta_parser.outputs.labels }}
+        cache-from: type=gha,scope=erp-ai-document-parser
+        cache-to: type=gha,mode=max,scope=erp-ai-document-parser
 
     # --- Embedding Service Image Tags & Push ---
     - name: Extract Docker Metadata — Embedding Service
@@ -130,6 +136,8 @@ jobs:
         push: true
         tags: ${{ steps.meta_embed.outputs.tags }}
         labels: ${{ steps.meta_embed.outputs.labels }}
+        cache-from: type=gha,scope=erp-ai-embedding-service
+        cache-to: type=gha,mode=max,scope=erp-ai-embedding-service
 
     # --- GitHub Release Creation ---
     - name: Create GitHub Release
