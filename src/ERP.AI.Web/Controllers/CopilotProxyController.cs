@@ -8,41 +8,36 @@ namespace ERP.AI.Web.Controllers;
 [Route("api/copilot")]
 public class CopilotProxyController : ControllerBase
 {
-    private readonly HttpClient _httpClient;
-    private readonly string _apiBaseUrl;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<CopilotProxyController> _logger;
 
-    public CopilotProxyController(HttpClient httpClient, IConfiguration configuration, ILogger<CopilotProxyController> logger)
+    public CopilotProxyController(IHttpClientFactory httpClientFactory, ILogger<CopilotProxyController> logger)
     {
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
-        // In Docker environment, Api:BaseUrl is set to http://api:8080.
-        // For local development, falls back to http://localhost:5000.
-        _apiBaseUrl = configuration["Api:BaseUrl"] ?? "http://localhost:5000";
     }
 
     [HttpPost("chat")]
     public async Task<IActionResult> ProxyChat([FromBody] JsonElement body, CancellationToken cancellationToken)
     {
-        var targetUrl = $"{_apiBaseUrl.TrimEnd('/')}/api/copilot/chat";
-        _logger.LogInformation("Proxying Copilot chat request to backend API: {TargetUrl}", targetUrl);
+        const string targetPath = "/api/copilot/chat";
+        _logger.LogInformation("Proxying Copilot chat request to backend API path: {TargetPath}", targetPath);
 
         try
         {
+            var httpClient = _httpClientFactory.CreateClient("ErpApi");
             var content = new StringContent(body.GetRawText(), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync(targetUrl, content, cancellationToken);
-            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
-
-            return StatusCode((int)response.StatusCode, responseContent);
+            var response = await httpClient.PostAsync(targetPath, content, cancellationToken);
+            return await ProxyResponseResult.FromAsync(response, cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while proxying chat request to {TargetUrl}", targetUrl);
+            _logger.LogError(ex, "Error occurred while proxying chat request to {TargetPath}", targetPath);
             return StatusCode(503, new
             {
                 error = "ERP AI API service is currently unavailable or unreachable.",
                 details = ex.Message,
-                targetUrl = targetUrl
+                targetPath = targetPath
             });
         }
     }

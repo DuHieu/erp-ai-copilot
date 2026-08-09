@@ -12,6 +12,8 @@ COPY tests/ERP.AI.Core.Tests/ERP.AI.Core.Tests.csproj tests/ERP.AI.Core.Tests/
 COPY tests/ERP.AI.Tools.Tests/ERP.AI.Tools.Tests.csproj tests/ERP.AI.Tools.Tests/
 COPY tests/ERP.AI.Copilot.Tests/ERP.AI.Copilot.Tests.csproj tests/ERP.AI.Copilot.Tests/
 COPY tests/ERP.AI.Knowledge.Tests/ERP.AI.Knowledge.Tests.csproj tests/ERP.AI.Knowledge.Tests/
+COPY tests/ERP.AI.Api.Tests/ERP.AI.Api.Tests.csproj tests/ERP.AI.Api.Tests/
+COPY tests/ERP.AI.Web.Tests/ERP.AI.Web.Tests.csproj tests/ERP.AI.Web.Tests/
 
 RUN dotnet restore ERP.AI.sln
 

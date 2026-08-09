@@ -1,7 +1,11 @@
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("ErpApi", (serviceProvider, client) =>
+{
+    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+    client.BaseAddress = new Uri(configuration["Api:BaseUrl"] ?? "http://localhost:5000");
+});
 
 var app = builder.Build();
 
@@ -13,3 +17,5 @@ app.UseRouting();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program;

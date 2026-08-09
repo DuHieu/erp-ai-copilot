@@ -9,18 +9,18 @@ namespace ERP.AI.Api.Controllers;
 public class HealthCheckController : ControllerBase
 {
     private readonly ErpDbContext _dbContext;
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _configuration;
     private readonly ILogger<HealthCheckController> _logger;
 
     public HealthCheckController(
         ErpDbContext dbContext,
-        HttpClient httpClient,
+        IHttpClientFactory httpClientFactory,
         IConfiguration configuration,
         ILogger<HealthCheckController> logger)
     {
         _dbContext = dbContext;
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactory;
         _configuration = configuration;
         _logger = logger;
     }
@@ -49,6 +49,7 @@ public class HealthCheckController : ControllerBase
         var ollamaEndpoint = _configuration["AI:Endpoint"] ?? "http://localhost:11434";
         var embeddingEndpoint = _configuration["Embedding:Endpoint"] ?? "http://localhost:8010";
         var qdrantEndpoint = _configuration["VectorStore:Endpoint"] ?? "http://localhost:6333";
+        var httpClient = _httpClientFactory.CreateClient();
 
         bool isOverallHealthy = true;
 
@@ -79,7 +80,7 @@ public class HealthCheckController : ControllerBase
             cts.CancelAfter(TimeSpan.FromSeconds(5));
 
             var tagsUrl = $"{ollamaEndpoint.TrimEnd('/')}/api/tags";
-            var response = await _httpClient.GetAsync(tagsUrl, cts.Token);
+            var response = await httpClient.GetAsync(tagsUrl, cts.Token);
             if (response.IsSuccessStatusCode)
             {
                 var jsonNode = await response.Content.ReadFromJsonAsync<JsonObject>(cancellationToken: cts.Token);
@@ -129,7 +130,7 @@ public class HealthCheckController : ControllerBase
             cts.CancelAfter(TimeSpan.FromSeconds(3));
 
             var url = $"{embeddingEndpoint.TrimEnd('/')}/health";
-            var response = await _httpClient.GetAsync(url, cts.Token);
+            var response = await httpClient.GetAsync(url, cts.Token);
             if (response.IsSuccessStatusCode)
             {
                 embeddingStatus = "Healthy";
@@ -154,7 +155,7 @@ public class HealthCheckController : ControllerBase
             cts.CancelAfter(TimeSpan.FromSeconds(3));
 
             var url = $"{qdrantEndpoint.TrimEnd('/')}/healthz";
-            var response = await _httpClient.GetAsync(url, cts.Token);
+            var response = await httpClient.GetAsync(url, cts.Token);
             if (response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 qdrantStatus = "Healthy";

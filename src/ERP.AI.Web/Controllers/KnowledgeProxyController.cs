@@ -7,33 +7,31 @@ namespace ERP.AI.Web.Controllers;
 [Route("api/knowledge")]
 public class KnowledgeProxyController : ControllerBase
 {
-    private readonly HttpClient _httpClient;
-    private readonly string _apiBaseUrl;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<KnowledgeProxyController> _logger;
 
-    public KnowledgeProxyController(HttpClient httpClient, IConfiguration configuration, ILogger<KnowledgeProxyController> logger)
+    public KnowledgeProxyController(IHttpClientFactory httpClientFactory, ILogger<KnowledgeProxyController> logger)
     {
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
-        _apiBaseUrl = configuration["Api:BaseUrl"] ?? "http://localhost:5000";
     }
 
     [HttpGet("{**path}")]
     public async Task<IActionResult> ProxyGet(string? path, CancellationToken cancellationToken)
     {
         var queryString = Request.QueryString.HasValue ? Request.QueryString.Value : string.Empty;
-        var targetUrl = $"{_apiBaseUrl.TrimEnd('/')}/api/knowledge/{path}{queryString}";
-        _logger.LogInformation("Proxying Knowledge GET request to: {TargetUrl}", targetUrl);
+        var targetPath = $"/api/knowledge/{path}{queryString}";
+        _logger.LogInformation("Proxying Knowledge GET request to: {TargetPath}", targetPath);
 
         try
         {
-            var response = await _httpClient.GetAsync(targetUrl, cancellationToken);
-            var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            return StatusCode((int)response.StatusCode, content);
+            var httpClient = _httpClientFactory.CreateClient("ErpApi");
+            var response = await httpClient.GetAsync(targetPath, cancellationToken);
+            return await ProxyResponseResult.FromAsync(response, cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed proxying Knowledge GET to {TargetUrl}", targetUrl);
+            _logger.LogError(ex, "Failed proxying Knowledge GET to {TargetPath}", targetPath);
             return StatusCode(503, new { error = "ERP AI API service is unavailable.", details = ex.Message });
         }
     }
@@ -41,12 +39,13 @@ public class KnowledgeProxyController : ControllerBase
     [HttpPost("{**path}")]
     public async Task<IActionResult> ProxyPost(string? path, CancellationToken cancellationToken)
     {
-        var targetUrl = $"{_apiBaseUrl.TrimEnd('/')}/api/knowledge/{path}";
-        _logger.LogInformation("Proxying Knowledge POST request to: {TargetUrl}", targetUrl);
+        var targetPath = $"/api/knowledge/{path}";
+        _logger.LogInformation("Proxying Knowledge POST request to: {TargetPath}", targetPath);
 
         try
         {
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, targetUrl);
+            var httpClient = _httpClientFactory.CreateClient("ErpApi");
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, targetPath);
 
             if (Request.HasFormContentType)
             {
@@ -75,13 +74,12 @@ public class KnowledgeProxyController : ControllerBase
                 requestMessage.Content = new StringContent(rawBody, Encoding.UTF8, Request.ContentType ?? "application/json");
             }
 
-            var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
-            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
-            return StatusCode((int)response.StatusCode, responseContent);
+            var response = await httpClient.SendAsync(requestMessage, cancellationToken);
+            return await ProxyResponseResult.FromAsync(response, cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed proxying Knowledge POST to {TargetUrl}", targetUrl);
+            _logger.LogError(ex, "Failed proxying Knowledge POST to {TargetPath}", targetPath);
             return StatusCode(503, new { error = "ERP AI API service is unavailable.", details = ex.Message });
         }
     }
@@ -89,18 +87,18 @@ public class KnowledgeProxyController : ControllerBase
     [HttpDelete("{**path}")]
     public async Task<IActionResult> ProxyDelete(string? path, CancellationToken cancellationToken)
     {
-        var targetUrl = $"{_apiBaseUrl.TrimEnd('/')}/api/knowledge/{path}";
-        _logger.LogInformation("Proxying Knowledge DELETE request to: {TargetUrl}", targetUrl);
+        var targetPath = $"/api/knowledge/{path}";
+        _logger.LogInformation("Proxying Knowledge DELETE request to: {TargetPath}", targetPath);
 
         try
         {
-            var response = await _httpClient.DeleteAsync(targetUrl, cancellationToken);
-            var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            return StatusCode((int)response.StatusCode, content);
+            var httpClient = _httpClientFactory.CreateClient("ErpApi");
+            var response = await httpClient.DeleteAsync(targetPath, cancellationToken);
+            return await ProxyResponseResult.FromAsync(response, cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed proxying Knowledge DELETE to {TargetUrl}", targetUrl);
+            _logger.LogError(ex, "Failed proxying Knowledge DELETE to {TargetPath}", targetPath);
             return StatusCode(503, new { error = "ERP AI API service is unavailable.", details = ex.Message });
         }
     }

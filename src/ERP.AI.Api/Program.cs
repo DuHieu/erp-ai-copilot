@@ -170,3 +170,5 @@ static void ValidateConfiguration(IConfiguration config)
         throw new InvalidOperationException("ConnectionStrings:DefaultConnection configuration is required.");
     }
 }
+
+public partial class Program;

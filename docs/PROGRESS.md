@@ -27,6 +27,10 @@ Updated in this review:
 - Fixed background document indexing to create its own DI scope and log failures.
 - Expanded `.gitignore` for Python sidecar artifacts and SQLite variants.
 - Reworked README into a clearer onboarding and project-status document.
+- Added API integration tests for health, readiness, copilot write refusal, and no-evidence RAG.
+- Added Web proxy integration tests to verify JSON content type and forwarded path/query.
+- Switched Web proxy controllers to `IHttpClientFactory` and preserved upstream response content type.
+- Added `scripts/docker-smoke.ps1` for local container health verification.
 
 ## Known Gaps
 
@@ -46,4 +50,5 @@ dotnet build ERP.AI.sln --configuration Release
 dotnet test ERP.AI.sln --configuration Release --no-build --verbosity normal
 docker build -f docker/Dockerfile.api -t erp-ai-api:local .
 docker build -f docker/Dockerfile.web -t erp-ai-web:local .
+./scripts/docker-smoke.ps1
 ```

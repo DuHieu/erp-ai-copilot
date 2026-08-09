@@ -91,6 +91,7 @@ For the full AI/RAG flow, prefer Docker Compose because the API depends on Ollam
 | `dotnet test ERP.AI.sln --configuration Release --no-build` | Run unit tests after build. |
 | `docker compose up -d --build` | Build and start the local full stack. |
 | `docker compose -f docker-compose.release.yml up -d` | Start from GHCR release images. |
+| `./scripts/docker-smoke.ps1` | Start the stack and verify core health endpoints. |
 | `docker compose down` | Stop the local stack. |
 | `docker compose logs -f api` | Follow API logs. |
 
@@ -169,6 +170,20 @@ Common environment variables:
 | `RAG_TEMPERATURE` | `0.1` | Low-temperature grounded answer generation. |
 
 See `.env.example` for the default local values.
+
+## Smoke Test
+
+After changing Docker, health checks, or runtime wiring, run:
+
+```powershell
+./scripts/docker-smoke.ps1
+```
+
+For release images:
+
+```powershell
+./scripts/docker-smoke.ps1 -ComposeFile docker-compose.release.yml -SkipBuild
+```
 
 ## Security Model
 
