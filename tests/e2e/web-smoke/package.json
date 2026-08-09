@@ -1,0 +1,12 @@
+{
+  "name": "erp-ai-web-smoke",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node smoke.mjs",
+    "install:browsers": "playwright install chromium"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.1"
+  }
+}

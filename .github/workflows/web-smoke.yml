@@ -1,0 +1,53 @@
+name: ERP AI Copilot Web Smoke
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "src/ERP.AI.Web/**"
+      - "tests/e2e/web-smoke/**"
+      - ".github/workflows/web-smoke.yml"
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "src/ERP.AI.Web/**"
+      - "tests/e2e/web-smoke/**"
+      - ".github/workflows/web-smoke.yml"
+  workflow_dispatch:
+
+jobs:
+  web-smoke:
+    name: Playwright Web Smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 8 SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 24
+        cache: npm
+        cache-dependency-path: tests/e2e/web-smoke/package-lock.json
+
+    - name: Restore .NET dependencies
+      run: dotnet restore ERP.AI.sln
+
+    - name: Install web smoke dependencies
+      working-directory: tests/e2e/web-smoke
+      run: npm ci
+
+    - name: Install Chromium
+      working-directory: tests/e2e/web-smoke
+      run: npx playwright install --with-deps chromium
+
+    - name: Run Playwright web smoke
+      working-directory: tests/e2e/web-smoke
+      run: npm test

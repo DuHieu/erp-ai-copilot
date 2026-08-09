@@ -16,6 +16,11 @@
 # Dotnet test results
 TestResults/
 
+# Node and browser smoke artifacts
+node_modules/
+playwright-report/
+test-results/
+
 # Python sidecars
 __pycache__/
 *.py[cod]

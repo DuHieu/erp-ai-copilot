@@ -89,6 +89,7 @@ For the full AI/RAG flow, prefer Docker Compose because the API depends on Ollam
 | `dotnet restore ERP.AI.sln` | Restore .NET dependencies. |
 | `dotnet build ERP.AI.sln --configuration Release` | Build all .NET projects. |
 | `dotnet test ERP.AI.sln --configuration Release --no-build` | Run unit tests after build. |
+| `npm --prefix tests/e2e/web-smoke test` | Run Playwright Web UI smoke with mocked API response. |
 | `docker compose up -d --build` | Build and start the local full stack. |
 | `docker compose -f docker-compose.release.yml up -d` | Start from GHCR release images. |
 | `./scripts/docker-smoke.ps1` | Start the stack and verify core health endpoints. |
@@ -175,6 +176,15 @@ Common environment variables:
 See `.env.example` for the default local values.
 
 ## Smoke Test
+
+Run the browser smoke for the Web UI:
+
+```powershell
+cd tests/e2e/web-smoke
+npm ci
+npx playwright install chromium
+npm test
+```
 
 After changing Docker, health checks, or runtime wiring, run:
 

@@ -33,6 +33,7 @@ Updated in this review:
 - Added `scripts/docker-smoke.ps1` for local container health verification.
 - Split heavy sidecar Docker builds into a separate path-filtered/manual GitHub Actions workflow.
 - Added opt-in API key protection for `/api/*`, config-driven current user/permissions, and Web proxy API-key forwarding.
+- Added Playwright Web smoke runner and path-filtered CI workflow for the Web UI.
 
 ## Known Gaps
 
@@ -40,7 +41,7 @@ Updated in this review:
 - Per-user authentication, tenant-aware authorization, and user management are not implemented.
 - Write actions are intentionally blocked until a human approval workflow exists.
 - Full RAG behavior requires local sidecars and model downloads; unit tests remain offline.
-- Browser UI has no automated Playwright coverage yet.
+- Browser UI has smoke-level Playwright coverage; deeper workflows are still pending.
 
 ## Verification Checklist
 
@@ -52,5 +53,8 @@ dotnet build ERP.AI.sln --configuration Release
 dotnet test ERP.AI.sln --configuration Release --no-build --verbosity normal
 docker build -f docker/Dockerfile.api -t erp-ai-api:local .
 docker build -f docker/Dockerfile.web -t erp-ai-web:local .
+npm --prefix tests/e2e/web-smoke ci
+npm --prefix tests/e2e/web-smoke exec playwright install chromium
+npm --prefix tests/e2e/web-smoke test
 ./scripts/docker-smoke.ps1
 ```
