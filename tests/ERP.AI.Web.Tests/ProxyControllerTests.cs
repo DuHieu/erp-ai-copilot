@@ -1,10 +1,12 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text;
+using ERP.AI.Web;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -59,6 +61,30 @@ public class ProxyControllerTests : IClassFixture<WebApplicationFactory<Program>
         handler.Requests[0].RequestUri?.PathAndQuery.Should().Be("/api/knowledge/documents?page=1&pageSize=20");
     }
 
+    [Fact]
+    public async Task ApiKeyProxyHeaderHandler_AddsConfiguredApiKey()
+    {
+        var handler = new CapturingHandler(_ => new HttpResponseMessage(HttpStatusCode.OK));
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Api:ApiKey"] = "proxy-test-key"
+            })
+            .Build();
+
+        using var apiKeyHandler = new ApiKeyProxyHeaderHandler(configuration)
+        {
+            InnerHandler = handler
+        };
+        using var client = new HttpClient(apiKeyHandler);
+
+        using var response = await client.GetAsync("http://api.test/api/knowledge/documents");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        handler.Requests.Should().ContainSingle();
+        handler.Requests[0].Headers.GetValues("X-API-Key").Should().ContainSingle("proxy-test-key");
+    }
+
     private WebApplicationFactory<Program> BuildFactory(CapturingHandler handler)
         => _factory.WithWebHostBuilder(builder =>
         {
@@ -105,5 +131,13 @@ internal sealed class CapturingHandler : HttpMessageHandler
     }
 
     private static HttpRequestMessage CloneRequest(HttpRequestMessage request)
-        => new(request.Method, request.RequestUri);
+    {
+        var clone = new HttpRequestMessage(request.Method, request.RequestUri);
+        foreach (var header in request.Headers)
+        {
+            clone.Headers.TryAddWithoutValidation(header.Key, header.Value);
+        }
+
+        return clone;
+    }
 }

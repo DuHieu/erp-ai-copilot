@@ -18,7 +18,7 @@ The project is designed as a local-first ERP assistant:
 | Document ingestion | Done | Stores metadata/chunks in SQLite and files on local storage. |
 | Semantic search | Done | Uses BAAI/bge-m3 embeddings and Qdrant. |
 | Grounded RAG | Done | Includes citation validation and no-evidence refusal path. |
-| Production auth | Not implemented | Current user and permission services are mocks. |
+| API key guard | Partial | Optional server-side API key protection for `/api/*`; full user identity is still pending. |
 | Write actions | Not implemented | Requires human-in-the-loop approval workflow before enabling. |
 
 Current milestone: Phase 2.3, grounded Knowledge RAG with source citations.
@@ -168,6 +168,9 @@ Common environment variables:
 | `RAG_MAX_CHUNK_CHARACTERS` | `3500` | Max characters per source chunk. |
 | `RAG_MAX_CONVERSATION_TURNS` | `6` | Follow-up context window size. |
 | `RAG_TEMPERATURE` | `0.1` | Low-temperature grounded answer generation. |
+| `API_REQUIRE_API_KEY` | `false` | Require `X-API-Key` or `Authorization: Bearer` for `/api/*`. |
+| `API_KEY` | empty | Shared API key used by the API and Web proxy when enabled. |
+| `API_KEY_USER_ID` | `demo-user` | User id attached to API-key-authenticated requests. |
 
 See `.env.example` for the default local values.
 
@@ -194,10 +197,12 @@ The current project is local-first and demo-oriented:
 - The LLM never receives direct database access.
 - Document content is treated as untrusted evidence.
 - No-evidence RAG responses do not call the LLM.
-- API auth is not production-ready; `MockCurrentUser` and `MockErpPermissionService` are placeholders.
+- `/api/*` can be protected with an opt-in API key guard.
+- The Web proxy forwards the configured API key server-side; the browser does not need to hold the API key.
+- API key auth is a deployment guard, not full production identity; replace it with real user authentication and per-user policies before public exposure.
 - Permissive local CORS is enabled for development and should be tightened before production use.
 
-Do not expose this stack to the public internet without replacing mock auth, tightening CORS, adding real authorization policies, and reviewing storage/network boundaries.
+Do not expose this stack to the public internet without enabling API protection, tightening CORS, adding real authorization policies, and reviewing storage/network boundaries.
 
 ## Progress Log
 

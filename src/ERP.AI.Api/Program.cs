@@ -1,10 +1,10 @@
 using ERP.AI.Api.Middleware;
+using ERP.AI.Api.Security;
 using ERP.AI.Copilot.Providers;
 using ERP.AI.Copilot.Services;
 using ERP.AI.Core.Interfaces;
 using ERP.AI.Infrastructure.Data;
 using ERP.AI.Infrastructure.Repositories;
-using ERP.AI.Infrastructure.Security;
 using ERP.AI.Knowledge.Interfaces;
 using ERP.AI.Tools.Definitions;
 using Microsoft.EntityFrameworkCore;
@@ -54,9 +54,10 @@ if (!string.IsNullOrWhiteSpace(dbDir) && !Directory.Exists(dbDir))
 builder.Services.AddDbContext<ErpDbContext>(options =>
     options.UseSqlite(connectionString));
 
-// Register Security Mocks
-builder.Services.AddScoped<ICurrentUser, MockCurrentUser>();
-builder.Services.AddScoped<IErpPermissionService, MockErpPermissionService>();
+// Register request user context and permission checks
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, HttpContextCurrentUser>();
+builder.Services.AddScoped<IErpPermissionService, ConfiguredErpPermissionService>();
 
 // Register Repositories
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
@@ -139,6 +140,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowAll");
+app.UseMiddleware<ApiKeyAuthenticationMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
 
@@ -168,6 +170,12 @@ static void ValidateConfiguration(IConfiguration config)
     if (string.IsNullOrWhiteSpace(connStr))
     {
         throw new InvalidOperationException("ConnectionStrings:DefaultConnection configuration is required.");
+    }
+
+    if (config.GetValue<bool>("Security:RequireApiKey") &&
+        string.IsNullOrWhiteSpace(config["Security:ApiKey"]))
+    {
+        throw new InvalidOperationException("Security:ApiKey is required when Security:RequireApiKey is true.");
     }
 }
 

@@ -75,6 +75,44 @@ public class ApiSmokeTests : IClassFixture<ApiApplicationFactory>
         body.Should().Contain("\"noEvidence\":true");
         CountingLlmProvider.CallCount.Should().Be(0);
     }
+
+    [Fact]
+    public async Task Health_RemainsPublic_WhenApiKeyIsRequired()
+    {
+        using var app = _factory.WithApiKeyRequired("test-api-key");
+        using var client = app.CreateClient();
+
+        using var response = await client.GetAsync("/health");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task ApiEndpoint_ReturnsUnauthorized_WhenApiKeyIsRequiredAndMissing()
+    {
+        using var app = _factory.WithApiKeyRequired("test-api-key");
+        using var client = app.CreateClient();
+
+        using var response = await client.PostAsJsonAsync("/api/copilot/chat", new { message = "create invoice for MAEDA" });
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().Contain("API key");
+    }
+
+    [Fact]
+    public async Task ApiEndpoint_AllowsRequest_WhenApiKeyIsValid()
+    {
+        using var app = _factory.WithApiKeyRequired("test-api-key");
+        using var client = app.CreateClient();
+        client.DefaultRequestHeaders.Add("X-API-Key", "test-api-key");
+
+        using var response = await client.PostAsJsonAsync("/api/copilot/chat", new { message = "create invoice for MAEDA" });
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().Contain("read-only ERP queries");
+    }
 }
 
 public sealed class ApiApplicationFactory : WebApplicationFactory<Program>
@@ -121,6 +159,20 @@ public sealed class ApiApplicationFactory : WebApplicationFactory<Program>
             services.AddSingleton<ILlmProvider, CountingLlmProvider>();
         });
     }
+
+    public WebApplicationFactory<Program> WithApiKeyRequired(string apiKey)
+        => WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureAppConfiguration((_, config) =>
+            {
+                config.AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["Security:RequireApiKey"] = "true",
+                    ["Security:ApiKey"] = apiKey,
+                    ["Security:ApiKeyUserId"] = "integration-test-user"
+                });
+            });
+        });
 
     protected override void Dispose(bool disposing)
     {

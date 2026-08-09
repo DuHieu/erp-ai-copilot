@@ -16,6 +16,9 @@ services:
       - VectorStore__Collection=erp_knowledge_chunks
       - ConnectionStrings__DefaultConnection=Data Source=/app/data/erp-demo.db
       - Knowledge__StoragePath=/app/data/knowledge/documents
+      - Security__RequireApiKey=${API_REQUIRE_API_KEY:-false}
+      - Security__ApiKey=${API_KEY:-}
+      - Security__ApiKeyUserId=${API_KEY_USER_ID:-demo-user}
       - Rag__TopK=${RAG_TOP_K:-6}
       - Rag__MinimumScore=${RAG_MIN_SCORE:-0.35}
       - Rag__MaximumSources=${RAG_MAX_SOURCES:-5}
@@ -54,6 +57,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
       - Api__BaseUrl=http://api:8080
+      - Api__ApiKey=${API_KEY:-}
     depends_on:
       - api
     restart: unless-stopped

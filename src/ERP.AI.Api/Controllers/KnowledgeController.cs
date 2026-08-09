@@ -1,3 +1,4 @@
+using ERP.AI.Core.Interfaces;
 using ERP.AI.Knowledge.Dtos;
 using ERP.AI.Knowledge.Enums;
 using ERP.AI.Knowledge.Interfaces;
@@ -20,6 +21,7 @@ public class KnowledgeController : ControllerBase
     private readonly IKnowledgeVectorStore _vectorStore;
     private readonly IKnowledgeRagService _ragService;
     private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly ICurrentUser _currentUser;
     private readonly ILogger<KnowledgeController> _logger;
 
     public KnowledgeController(
@@ -32,6 +34,7 @@ public class KnowledgeController : ControllerBase
         IKnowledgeVectorStore vectorStore,
         IKnowledgeRagService ragService,
         IServiceScopeFactory serviceScopeFactory,
+        ICurrentUser currentUser,
         ILogger<KnowledgeController> logger)
     {
         _ingestionService = ingestionService;
@@ -43,6 +46,7 @@ public class KnowledgeController : ControllerBase
         _vectorStore = vectorStore;
         _ragService = ragService;
         _serviceScopeFactory = serviceScopeFactory;
+        _currentUser = currentUser;
         _logger = logger;
     }
 
@@ -156,7 +160,7 @@ public class KnowledgeController : ControllerBase
                 mimeType: file.ContentType,
                 contentStream: stream,
                 request: uploadRequest,
-                uploadedBy: "CurrentUser",
+                uploadedBy: _currentUser.UserId,
                 cancellationToken: cancellationToken
             );
 

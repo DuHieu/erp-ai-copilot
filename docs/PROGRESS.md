@@ -32,11 +32,12 @@ Updated in this review:
 - Switched Web proxy controllers to `IHttpClientFactory` and preserved upstream response content type.
 - Added `scripts/docker-smoke.ps1` for local container health verification.
 - Split heavy sidecar Docker builds into a separate path-filtered/manual GitHub Actions workflow.
+- Added opt-in API key protection for `/api/*`, config-driven current user/permissions, and Web proxy API-key forwarding.
 
 ## Known Gaps
 
-- Production authentication and authorization are not implemented.
-- `MockCurrentUser` and `MockErpPermissionService` are demo placeholders.
+- API key protection is a deployment guard, not full production identity.
+- Per-user authentication, tenant-aware authorization, and user management are not implemented.
 - Write actions are intentionally blocked until a human approval workflow exists.
 - Full RAG behavior requires local sidecars and model downloads; unit tests remain offline.
 - Browser UI has no automated Playwright coverage yet.
